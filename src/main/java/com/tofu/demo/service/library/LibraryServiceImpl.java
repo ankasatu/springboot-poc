@@ -10,11 +10,14 @@ import com.tofu.demo.service.dto.BookRequest;
 import com.tofu.demo.service.dto.BookResponse;
 import com.tofu.demo.service.dto.LabelResponse;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class LibraryServiceImpl implements LibraryService {
@@ -107,18 +110,8 @@ public class LibraryServiceImpl implements LibraryService {
         bookLabelRepository.saveAll(labels);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    @Override
+    public void periodic1() {
+        log.info("Periodic task: {}", LocalDateTime.now());
+    }
 }

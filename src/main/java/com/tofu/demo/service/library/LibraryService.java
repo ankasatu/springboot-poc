@@ -15,4 +15,6 @@ public interface LibraryService {
     void bookDelete(String id);
 
     void labelAssign(String bookId, List<String> nameList);
+
+    void periodic1();
 }
