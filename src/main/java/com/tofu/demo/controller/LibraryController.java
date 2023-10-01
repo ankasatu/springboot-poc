@@ -4,6 +4,7 @@ import com.tofu.demo.service.dto.BookRequest;
 import com.tofu.demo.service.dto.BookResponse;
 import com.tofu.demo.service.library.LibraryService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,8 +48,8 @@ public class LibraryController {
     }
 
     @PostMapping("/book/{id}/label")
-    public ResponseEntity<Object> insertBook(@PathVariable("id") String id, @RequestBody List<String> request) {
-        libraryService.labelAssign(id, request);
+    public ResponseEntity<Object> insertBook(@PathVariable("id") String id, @RequestBody List<String> labelIds) {
+        libraryService.labelAssign(id, labelIds);
         return ResponseEntity.ok(null);
     }
 

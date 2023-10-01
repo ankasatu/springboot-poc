@@ -3,12 +3,14 @@ package com.tofu.demo.service.library;
 import com.tofu.demo.exception.ValidationException;
 import com.tofu.demo.model.Book;
 import com.tofu.demo.model.BookLabel;
+import com.tofu.demo.model.Label;
 import com.tofu.demo.repository.BookLabelRepository;
 import com.tofu.demo.repository.BookRepository;
 import com.tofu.demo.service.dto.BookDetailResponse;
 import com.tofu.demo.service.dto.BookRequest;
 import com.tofu.demo.service.dto.BookResponse;
 import com.tofu.demo.service.dto.LabelResponse;
+import com.tofu.demo.service.label.LabelService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,8 @@ public class LibraryServiceImpl implements LibraryService {
     private BookRepository bookRepository;
     private BookLabelRepository bookLabelRepository;
 
+    private LabelService labelService;
+
     @Override
     public List<BookResponse> getBooks() {
         return bookRepository.findAll().stream().map(p-> BookResponse.builder()
@@ -33,7 +37,7 @@ public class LibraryServiceImpl implements LibraryService {
                 .isbn(p.getIsbn())
                 .title(p.getTitle())
                 .publisher(p.getPublisher())
-                .year(p.getPublicationYear())
+                .year(p.getYear())
                 .build()
         ).toList();
     }
@@ -43,7 +47,7 @@ public class LibraryServiceImpl implements LibraryService {
         var book = bookRepository.findByIsbn(isbn).orElseThrow(()-> new ValidationException("id tidak ditemukan"));
         var labels = book.getLabels().stream().map(p-> LabelResponse.builder()
                 .id(p.getId())
-                .name(p.getName())
+                .name(p.getLabel().getName())
                 .build()).toList();
 
         return BookDetailResponse.builder()
@@ -52,7 +56,7 @@ public class LibraryServiceImpl implements LibraryService {
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .publisher(book.getPublisher())
-                .year(book.getPublicationYear())
+                .year(book.getYear())
                 .labels(labels)
                 .build();
     }
@@ -69,7 +73,7 @@ public class LibraryServiceImpl implements LibraryService {
                 .title(request.getTitle())
                 .author(request.getAuthor())
                 .publisher(request.getPublisher())
-                .publicationYear(request.getYear())
+                .year(request.getYear())
                 .build();
 
         var result = bookRepository.save(tmp);
@@ -84,7 +88,7 @@ public class LibraryServiceImpl implements LibraryService {
         book.setIsbn(request.getIsbn());
         book.setAuthor(request.getAuthor());
         book.setPublisher(request.getPublisher());
-        book.setPublicationYear(request.getYear());
+        book.setYear(request.getYear());
         book.setTitle(request.getTitle());
 
         bookRepository.save(book);
@@ -98,16 +102,19 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public void labelAssign(String bookId, List<String> nameList)
+    public void labelAssign(String bookId, List<String> labelIds)
     {
-        var book = bookRepository.findById(bookId).orElseThrow(()-> new ValidationException("book id tidak ditemukan"));
+        Book book = bookRepository.findById(bookId).orElseThrow(()-> new ValidationException("book id tidak ditemukan"));
+        List<Label> labels = labelService.getLabelByIds(labelIds);
 
-        var labels = nameList.stream().map(p->BookLabel.builder()
-                .id(UUID.randomUUID().toString())
-                        .book(book)
-                        .name(p)
-                .build()).toList();
-        bookLabelRepository.saveAll(labels);
+        List<BookLabel> bookLabels = labels.stream().map(label->BookLabel.builder()
+                    .id(UUID.randomUUID().toString())
+                    .book(book)
+                    .label(label)
+                    .build())
+                .toList();
+
+        bookLabelRepository.saveAll(bookLabels);
     }
 
     @Override

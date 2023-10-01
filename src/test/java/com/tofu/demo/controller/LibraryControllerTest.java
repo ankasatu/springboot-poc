@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -50,15 +49,15 @@ class LibraryControllerTest {
         books = Arrays.asList(
                 Book.builder().id("9255182e-fdec-40ba-954d-5baf70bc82c6").isbn("1569317917")
                         .title("Spirited Away, Vol. 1").author("Hayao Miyazaki")
-                        .publicationYear(2002).publisher("VIZ LLC")
+                        .year(2002).publisher("VIZ LLC")
                         .build(),
                 Book.builder().id("2e982e59-6fcc-48d6-a20b-f87e1c54fd87").isbn("4091011896")
                         .title("Inuyasha Anime Artbook").author("Rumiko Takahashi")
-                        .publicationYear(2001).publisher("Shogakukan")
+                        .year(2001).publisher("Shogakukan")
                         .build(),
                 Book.builder().id("cda0b064-0ea6-44b3-80c8-a7ae59ad3ea7").isbn("1569314950")
                         .title("Dragonball (Volume 1)").author("Akira Toriyama")
-                        .publicationYear(2000).publisher("VIZ LLC")
+                        .year(2000).publisher("VIZ LLC")
                         .build()
         );
 

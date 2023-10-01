@@ -13,8 +13,7 @@ public interface LibraryService {
     String bookCreate(BookRequest request);
     void bookUpdate(String id, BookRequest request);
     void bookDelete(String id);
-
-    void labelAssign(String bookId, List<String> nameList);
+    void labelAssign(String bookId, List<String> labelIds);
 
     void periodic1();
 }

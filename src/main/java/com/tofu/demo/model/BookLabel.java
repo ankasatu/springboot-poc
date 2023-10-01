@@ -11,17 +11,21 @@ import org.hibernate.annotations.GenericGenerator;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "book_label")
+@Table(name = "book_label", uniqueConstraints = {
+        @UniqueConstraint(name="uq_book_label", columnNames = {"book_id", "label_id"})
+})
 public class BookLabel {
     @Id
     @GenericGenerator(name = "UUID")
     private String id;
 
-    @Column(name = "name", nullable = false, length = 64)
-    private String name;
-
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", foreignKey=@ForeignKey(name = "fk_book"))
     private Book book;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "label_id", foreignKey=@ForeignKey(name = "fk_label"))
+    private Label label;
 }

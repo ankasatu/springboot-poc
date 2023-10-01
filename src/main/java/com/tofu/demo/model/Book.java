@@ -33,8 +33,8 @@ public class Book {
     @Column(name = "publisher", nullable = false, length = 32)
     private String publisher;
 
-    @Column(name = "year_of_publication", nullable = false, length = 4)
-    private int publicationYear;
+    @Column(name = "year", nullable = false, length = 4)
+    private int year;
 
     @JsonIgnore
     @OneToMany(mappedBy = "book")
