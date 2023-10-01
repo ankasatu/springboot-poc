@@ -6,6 +6,7 @@ import com.tofu.demo.model.Book;
 import com.tofu.demo.repository.BookLabelRepository;
 import com.tofu.demo.repository.BookRepository;
 import com.tofu.demo.service.dto.BookRequest;
+import com.tofu.demo.service.label.LabelService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -26,6 +27,8 @@ class LibraryServiceImplTest {
     private BookLabelRepository bookLabelRepository;
     @Mock
     private LibraryService service;
+    @Mock
+    private LabelService labelService;
 
     BookRequest request;
 
@@ -33,7 +36,7 @@ class LibraryServiceImplTest {
     private void beforeEach() {
         MockitoAnnotations.openMocks(this);
 
-        service = new LibraryServiceImpl(bookRepository, bookLabelRepository);
+        service = new LibraryServiceImpl(bookRepository, bookLabelRepository, labelService);
 
         Book savedBook = Book.builder()
                 .id(UUID.randomUUID().toString())
