@@ -5,6 +5,7 @@ import com.tofu.demo.model.Label;
 import com.tofu.demo.repository.LabelRepository;
 import com.tofu.demo.service.dto.LabelRequest;
 import com.tofu.demo.service.dto.LabelResponse;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -15,9 +16,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class LabelServiceImpl implements LabelService {
 
-    @Autowired
     private LabelRepository labelRepository;
 
     @Override

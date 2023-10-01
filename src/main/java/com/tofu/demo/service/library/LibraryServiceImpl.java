@@ -46,8 +46,9 @@ public class LibraryServiceImpl implements LibraryService {
     public BookDetailResponse getBookDetail(String isbn) {
         var book = bookRepository.findByIsbn(isbn).orElseThrow(()-> new ValidationException("id tidak ditemukan"));
         var labels = book.getLabels().stream().map(p-> LabelResponse.builder()
-                .id(p.getId())
+                .id(p.getLabel().getId())
                 .name(p.getLabel().getName())
+                .description(p.getLabel().getDescription())
                 .build()).toList();
 
         return BookDetailResponse.builder()
