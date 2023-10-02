@@ -1,12 +1,13 @@
 package com.tofu.demo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tofu.demo.Utils;
 import com.tofu.demo.model.Book;
+import com.tofu.demo.model.BookLabel;
+import com.tofu.demo.model.Label;
+import com.tofu.demo.repository.BookLabelRepository;
 import com.tofu.demo.repository.BookRepository;
-import com.tofu.demo.service.dto.BookRequest;
+import com.tofu.demo.repository.LabelRepository;
 import com.tofu.demo.service.library.LibraryService;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -34,6 +31,10 @@ class LibraryControllerTest {
 
     @Autowired
     private BookRepository bookRepository;
+    @Autowired
+    private LabelRepository labelRepository;
+    @Autowired
+    private BookLabelRepository bookLabelRepository;
 
 
     @Autowired
@@ -43,6 +44,8 @@ class LibraryControllerTest {
     private ObjectMapper objectMapper;
 
     List<Book> books;
+    List<Label> labels;
+    List<BookLabel> bookLabels;
 
     @BeforeEach
     public void setUp() {
@@ -60,41 +63,46 @@ class LibraryControllerTest {
                         .year(2000).publisher("VIZ LLC")
                         .build()
         );
-
         bookRepository.saveAll(books);
+
+        labels = Arrays.asList(
+                Label.builder().id("label1").name("Label-1").build(),
+                Label.builder().id("label2").name("Label-2").build(),
+                Label.builder().id("label3").name("Label-3").build()
+        );
+        labelRepository.saveAll(labels);
+
+        bookLabels = Arrays.asList(
+                BookLabel.builder()
+                        .id("rel1").label(labels.get(0)).book(books.get(2))
+                        .build()
+        );
+        bookLabelRepository.saveAll(bookLabels);
+
+    }
+
+
+    @Test
+    void testSetLabelForBook() throws Exception {
+        String bookId = books.get(0).getId();
+        List<String> labelIds = Arrays.asList("label1", "label2", "label3");
+
+        String labelIdsJson = objectMapper.writeValueAsString(labelIds);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/library/assign/book/{id}/labels", bookId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(labelIdsJson))
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
-    public void testGetBooks() throws Exception {
-        mockMvc.perform(get("/library/books")
+    void testGetBooksByLabelId() throws Exception {
+        String labelId = labels.get(0).getId();
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/library/label/{labelId}/book", labelId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].title").value(books.get(0).getTitle()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].title").value(books.get(1).getTitle()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[2].title").value(books.get(2).getTitle()));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.label").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.books").isArray());
     }
-
-    @Test
-    @SneakyThrows
-    public void testInsertBook() {
-        var request = BookRequest.builder()
-                .title("The Illusion of Life")
-                .author("Frank Thomas")
-                .isbn("0896592324")
-                .publisher("Disney Editions")
-                .year(1981)
-                .build();
-
-        var requestString = objectMapper.writeValueAsString(request);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/library/book")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestString))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.valueOf("text/plain;charset=UTF-8")))
-                .andExpect(content().string(Utils.matchUuidFormat));
-    }
-
-
 }

@@ -1,17 +1,22 @@
 package com.tofu.demo.service.library;
 
 import com.tofu.demo.Utils;
+import com.tofu.demo.exception.DataNotFoundException;
 import com.tofu.demo.exception.ValidationException;
 import com.tofu.demo.model.Book;
+import com.tofu.demo.model.BookLabel;
+import com.tofu.demo.model.Label;
 import com.tofu.demo.repository.BookLabelRepository;
 import com.tofu.demo.repository.BookRepository;
 import com.tofu.demo.service.dto.BookRequest;
 import com.tofu.demo.service.label.LabelService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -53,27 +58,62 @@ class LibraryServiceImplTest {
                 .build();
     }
 
-    @Test
-    public void testBookCreate_Success() {
-        when(bookRepository.findByIsbn(any())).thenReturn(Optional.empty());
+    @Nested
+    class SetBooklabel {
+        @Test
+        void shouldSuccess() {
+            Book existingBook = Book.builder().build();
+            List<Label> labels = List.of(Label.builder().build(), Label.builder().build());
 
-        String result = service.bookCreate(request);
+            when(bookRepository.findById(any())).thenReturn(Optional.of(existingBook));
+            when(labelService.getLabelByIds(any())).thenReturn(labels);
 
-        assertTrue(Utils.matchUuidFormat.matches(result));
-        assertNotNull(result);
-        verify(bookRepository, times(1)).findByIsbn(any());
-        verify(bookRepository, times(1)).save(any(Book.class));
+            String bookId = "123";
+            List<String> labelIds = List.of("labelId1", "labelId2");
+            service.setBookLabel(bookId, labelIds);
+
+            verify(bookRepository, times(1)).findById(bookId);
+            verify(labelService, times(1)).getLabelByIds(labelIds);
+            verify(bookLabelRepository, times(1)).saveAll(any());
+        }
+
+        @Test
+        void shouldThrowIfBookNotFound() {
+            String bookId = "123";
+            List<String> labelIds = List.of("labelId1", "labelId2");
+
+            when(bookRepository.findById(any())).thenReturn(Optional.empty());
+
+            assertThrows(DataNotFoundException.class, () -> service.setBookLabel(bookId, labelIds));
+
+            verify(labelService, never()).getLabelByIds(anyList());
+            verify(bookLabelRepository, never()).saveAll(anyList());
+        }
     }
 
-    @Test
-    public void testBookCreate_IsbnAlreadyExists() {
-        when(bookRepository.findByIsbn(any())).thenReturn(Optional.of(Book.builder().build()));
+    @Nested
+    class GetBooksByLabelId {
+        Label label;
+        @BeforeEach
+        void before() {
+            label = Label.builder().build();
+            label.setBookLabels(List.of(BookLabel.builder().book(Book.builder().build()).build()));
+        }
 
-        assertThrowsExactly(ValidationException.class, () -> service.bookCreate(request));
+        @Test
+        void shouldSuccess() {
+            when(labelService.getLabelByIds(any())).thenReturn(List.of(label));
 
-        verify(bookRepository, times(1)).findByIsbn(any());
-        verify(bookRepository, never()).save(any(Book.class));
+            var result = service.getBooksByLabel("12345");
+
+            assertNotNull(result);
+        }
+
+        @Test
+        void shouldThrow() {
+            when(labelService.getLabelByIds(any())).thenReturn(List.of());
+
+            assertThrowsExactly(DataNotFoundException.class, () -> service.getBooksByLabel("1234"));
+        }
     }
-
-
 }

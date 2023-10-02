@@ -5,9 +5,7 @@ import com.tofu.demo.service.dto.LabelResponse;
 import com.tofu.demo.service.label.LabelService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.AllArgsConstructor;
-import org.springdoc.core.annotations.RouterOperation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,21 +27,17 @@ public class LabelController {
 
     @PostMapping()
     @Operation(summary = "Insert a new label")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Label inserted successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input")
-    })
+    @ApiResponse(responseCode = "200", description = "Label inserted successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
     public ResponseEntity<Object> insert(@RequestBody LabelRequest request) {
-        var contextId = labelService.create(request);
+        String contextId = labelService.create(request);
         return ResponseEntity.ok(contextId);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Edit an existing label by ID")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Label edited successfully"),
-            @ApiResponse(responseCode = "404", description = "Label not found")
-    })
+    @ApiResponse(responseCode = "200", description = "Label edited successfully")
+    @ApiResponse(responseCode = "404", description = "Label not found")
     public ResponseEntity<Object> edit(@PathVariable("id") String id, @RequestBody LabelRequest request) {
         labelService.edit(id, request);
         return ResponseEntity.ok(null);
@@ -51,10 +45,8 @@ public class LabelController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a label by ID")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Label deleted successfully"),
-            @ApiResponse(responseCode = "400", description = "Label not found")
-    })
+    @ApiResponse(responseCode = "200", description = "Label deleted successfully")
+    @ApiResponse(responseCode = "400", description = "Label not found")
     public ResponseEntity<Object> delete(@PathVariable("id") String id) {
         labelService.delete(id);
         return ResponseEntity.ok(null);
